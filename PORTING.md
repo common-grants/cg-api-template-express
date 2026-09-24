@@ -318,7 +318,9 @@ history and cherry-pick it deliberately:
   dependency policies.
 - Update `name`, `description` and `license` in `package.json`, and the
   `info` block in `src/api/openapi.ts` that titles your OpenAPI document.
-- `swagger-ui-express` serves the UI bundle locally from `node_modules`; no
-  CDN is involved, so `/docs` works in a locked-down deployment as it is.
-  Remove the docs router from `src/api/index.ts` if you do not want to expose
-  it.
+- `swagger-ui-express` serves the UI bundle locally from `node_modules`, and
+  the online validator badge, which would send your document's URL to
+  swagger.io, is turned off in `src/api/controllers/docs.controller.ts`. No CDN
+  or third-party request is involved, so `/docs` works in a locked-down
+  deployment as it is. Remove the docs router from `src/api/index.ts` if you do
+  not want to expose it.

@@ -34,6 +34,8 @@ describe("createApp", () => {
     const init = await request(app()).get("/docs/swagger-ui-init.js");
     expect(init.status).toBe(200);
     expect(init.text).toContain('"/openapi.json"');
+    // Off, so the page never sends the document's URL to swagger.io.
+    expect(init.text).toContain('"validatorUrl": null');
   });
 
   it("serves the Swagger UI bundle itself rather than linking a CDN", async () => {
