@@ -159,10 +159,14 @@ describe("get an opportunity", () => {
     expect(NotFoundSchema.parse(res.body).status).toBe(404);
   });
 
-  it("returns an ErrorSchema-valid 400 for an id that is not a UUID", async () => {
+  it.each([
+    ["an id that is not a UUID", "not-a-uuid"],
+    // The router fails to percent-decode this before the handler runs.
+    ["an id that is not valid percent-encoding", "%E0"],
+  ])("returns an ErrorSchema-valid 400 for %s", async (_label, id) => {
     const { app, calls } = harness();
 
-    const res = await request(app).get(`${BASE}/not-a-uuid`);
+    const res = await request(app).get(`${BASE}/${id}`);
 
     expect(res.status).toBe(400);
     expect(ErrorSchema.parse(res.body).status).toBe(400);
