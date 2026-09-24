@@ -20,6 +20,37 @@ describe("createApp", () => {
     expect(SuccessSchema.safeParse(res.body).success).toBe(true);
   });
 
+  it("serves an OpenAPI 3.1 document", async () => {
+    const res = await request(app()).get("/openapi.json");
+    expect(res.status).toBe(200);
+    expect((res.body as { openapi: string }).openapi).toBe("3.1.0");
+  });
+
+  it("serves Swagger UI at /docs, pointed at the served document", async () => {
+    const page = await request(app()).get("/docs/");
+    expect(page.status).toBe(200);
+    expect(page.headers["content-type"]).toContain("text/html");
+
+    const init = await request(app()).get("/docs/swagger-ui-init.js");
+    expect(init.status).toBe(200);
+    expect(init.text).toContain('"/openapi.json"');
+  });
+
+  it("serves the Swagger UI bundle itself rather than linking a CDN", async () => {
+    const page = await request(app()).get("/docs/");
+    expect(page.text).toContain("./swagger-ui-bundle.js");
+    expect(page.text).not.toMatch(/src=["']https?:/);
+
+    const bundle = await request(app()).get("/docs/swagger-ui-bundle.js");
+    expect(bundle.status).toBe(200);
+  });
+
+  it("redirects /docs to /docs/ so the page's relative asset paths resolve", async () => {
+    const res = await request(app()).get("/docs");
+    expect(res.status).toBe(301);
+    expect(res.headers["location"]).toBe("/docs/");
+  });
+
   it("answers an unrouted path with an ErrorSchema-valid 404", async () => {
     const res = await request(app()).get("/no-such-route");
     expect(res.status).toBe(404);

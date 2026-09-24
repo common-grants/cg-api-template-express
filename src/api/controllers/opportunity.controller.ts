@@ -33,6 +33,9 @@ import type {
   SortSpec,
 } from "../services/opportunity.service.js";
 
+/** Where the router is mounted, per the CommonGrants base API. */
+export const OPPORTUNITIES_BASE_PATH = "/common-grants/opportunities";
+
 // ############################################################################
 // Request and response schemas
 // ############################################################################

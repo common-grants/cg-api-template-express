@@ -7,12 +7,13 @@
  */
 
 import express, { type Express } from "express";
-import { createOpportunityRouter } from "./controllers/opportunity.controller.js";
+import { createDocsRouter } from "./controllers/docs.controller.js";
+import {
+  OPPORTUNITIES_BASE_PATH,
+  createOpportunityRouter,
+} from "./controllers/opportunity.controller.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware.js";
 import type { OpportunityService } from "./services/opportunity.service.js";
-
-/** Where the opportunities router is mounted, per the CommonGrants base API. */
-export const OPPORTUNITIES_BASE_PATH = "/common-grants/opportunities";
 
 export interface CreateAppOptions {
   service: OpportunityService;
@@ -28,6 +29,7 @@ export function createApp({ service }: CreateAppOptions): Express {
   });
 
   app.use(OPPORTUNITIES_BASE_PATH, createOpportunityRouter(service));
+  app.use(createDocsRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);
