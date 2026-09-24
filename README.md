@@ -108,6 +108,11 @@ an unsupported custom filter is ignored and named in `filterInfo.errors`, and a
 custom sort key falls back to the default order with a note in
 `sortInfo.errors`.
 
+The supported SDK range is `@common-grants/sdk` `^0.8.0`: 0.8.0 up to, but not
+including, 0.9.0. CI tests both ends. The `verify` job runs against the version
+in `pnpm-lock.yaml`, currently the floor of the range, and the `sdk-range` job
+first updates the SDK to the newest release inside the range.
+
 ## Commands
 
 | Command                             | What it does                                                    |

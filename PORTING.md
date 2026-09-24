@@ -233,8 +233,8 @@ schema imported from the SDK throws a `TypeError` at runtime. So does
 `registry.register("Name", SdkSchema)`, which calls `.openapi()` internally.
 
 This template never calls `.openapi()`. `src/api/openapi.ts` passes SDK schemas
-by reference, which inlines them, and uses Zod's own `.meta()` for examples,
-which works on both copies:
+by reference, which inlines them, and the route schemas use Zod's own `.meta()`
+for examples, which works on both copies:
 
 ```ts
 // Throws at runtime, even after extendZodWithOpenApi(z):
