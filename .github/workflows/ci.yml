@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push supersedes an in-flight run on the same ref, but never on main.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verify:
+    name: Checks, build, tests and audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run checks, build and tests
+        run: pnpm run ci
+
+      # Any high or critical advisory, or an audit-service failure, fails the job.
+      - name: Audit dependencies
+        run: pnpm run audit
+
+  sdk-range:
+    name: Tests against the newest SDK in the declared range
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies without the frozen lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Update the SDK within its declared range
+        run: pnpm update @common-grants/sdk
+
+      - name: Show the resolved SDK version
+        run: pnpm list @common-grants/sdk
+
+      - name: Run tests
+        run: pnpm run test
