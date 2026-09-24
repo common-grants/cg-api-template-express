@@ -25,11 +25,15 @@ export class ApiError extends Error {
   }
 }
 
-/** Express's own 4xx errors, such as a body that is not valid JSON. */
+/**
+ * Express's own 4xx errors, such as a body that is not valid JSON. They come
+ * from `http-errors`, which marks them `expose`; a service error that merely
+ * carries a `status`, as HTTP-client errors often do, is a 500.
+ */
 function isClientHttpError(err: unknown): err is { status: number; message: string } {
-  if (typeof err !== "object" || err === null || !("status" in err)) return false;
-  const { status } = err as { status: unknown };
-  return typeof status === "number" && status >= 400 && status < 500;
+  if (typeof err !== "object" || err === null) return false;
+  const { status, expose } = err as { status?: unknown; expose?: unknown };
+  return expose === true && typeof status === "number" && status >= 400 && status < 500;
 }
 
 /** Unrouted paths get a body a CommonGrants client can parse. */

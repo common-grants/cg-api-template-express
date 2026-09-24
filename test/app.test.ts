@@ -68,16 +68,22 @@ describe("createApp", () => {
     expect(ErrorSchema.parse(res.body).status).toBe(400);
   });
 
-  it("answers a thrown service failure with an ErrorSchema-valid 500", async () => {
+  it.each([
+    ["a thrown service failure", new Error("database is on fire")],
+    [
+      "a service failure carrying an upstream HTTP status",
+      Object.assign(new Error("upstream answered 401"), { status: 401 }),
+    ],
+  ])("answers %s with an ErrorSchema-valid 500", async (_label, failure) => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const failing = createApp(stubService({ throws: new Error("database is on fire") }));
+    const failing = createApp(stubService({ throws: failure }));
 
     const res = await request(failing).get("/common-grants/opportunities");
 
     expect(res.status).toBe(500);
     expect(ErrorSchema.parse(res.body).status).toBe(500);
     // The underlying failure is logged, never returned.
-    expect(JSON.stringify(res.body)).not.toContain("database is on fire");
+    expect(JSON.stringify(res.body)).not.toContain(failure.message);
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
   });
