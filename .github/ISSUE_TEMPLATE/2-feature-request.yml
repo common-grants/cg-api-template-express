@@ -1,6 +1,6 @@
 name: Feature Request
 description: Request a new feature in the template
-type: Enhancement
+type: Feature
 body:
   - type: markdown
     attributes:
