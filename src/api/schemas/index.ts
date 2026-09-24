@@ -16,5 +16,6 @@ export {
   PaginatedQueryParamsSchema,
   PaginatedSchema,
   SuccessSchema,
+  UuidSchema,
 } from "@common-grants/sdk/schemas";
 export { OpportunitySchema, type Opportunity } from "./opportunity.js";

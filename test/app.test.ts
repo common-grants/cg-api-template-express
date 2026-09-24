@@ -1,0 +1,53 @@
+import { describe, expect, it, vi } from "vitest";
+import request from "supertest";
+import { ErrorSchema, SuccessSchema } from "@common-grants/sdk/schemas";
+import { createApp } from "../src/api/index.js";
+import { stubService } from "./support.js";
+
+function app() {
+  return createApp(stubService());
+}
+
+describe("createApp", () => {
+  it("constructs without side effects", () => {
+    // Tests and the OpenAPI export build an app without wanting a listening server.
+    expect(() => app()).not.toThrow();
+  });
+
+  it("serves a health check that validates against the SDK success schema", async () => {
+    const res = await request(app()).get("/health");
+    expect(res.status).toBe(200);
+    expect(SuccessSchema.safeParse(res.body).success).toBe(true);
+  });
+
+  it("answers an unrouted path with an ErrorSchema-valid 404", async () => {
+    const res = await request(app()).get("/no-such-route");
+    expect(res.status).toBe(404);
+    expect(ErrorSchema.parse(res.body).status).toBe(404);
+  });
+
+  it("answers a malformed JSON body with an ErrorSchema-valid 400", async () => {
+    const res = await request(app())
+      .post("/common-grants/opportunities/search")
+      .set("Content-Type", "application/json")
+      .send("{ this is not json");
+    expect(res.status).toBe(400);
+    // Not Express's default HTML error page.
+    expect(res.headers["content-type"]).toContain("application/json");
+    expect(ErrorSchema.parse(res.body).status).toBe(400);
+  });
+
+  it("answers a thrown service failure with an ErrorSchema-valid 500", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const failing = createApp(stubService({ throws: new Error("database is on fire") }));
+
+    const res = await request(failing).get("/common-grants/opportunities");
+
+    expect(res.status).toBe(500);
+    expect(ErrorSchema.parse(res.body).status).toBe(500);
+    // The underlying failure is logged, never returned.
+    expect(JSON.stringify(res.body)).not.toContain("database is on fire");
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+});
