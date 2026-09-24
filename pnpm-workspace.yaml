@@ -6,3 +6,7 @@ allowBuilds:
   esbuild: true
   # swagger-ui-dist pulls in Scarf's install-time analytics; never run it.
   "@scarf/scarf": false
+
+# CommonGrants packages are first-party for this template and are tested the day they ship.
+minimumReleaseAgeExclude:
+  - "@common-grants/*"
