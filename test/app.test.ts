@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import request from "supertest";
-import { ErrorSchema, SuccessSchema } from "@common-grants/sdk/schemas";
+import { ErrorSchema, NotFoundSchema, SuccessSchema } from "@common-grants/sdk/schemas";
 import { createApp } from "../src/api/index.js";
 import { stubService } from "./support.js";
 
@@ -51,10 +51,10 @@ describe("createApp", () => {
     expect(res.headers["location"]).toBe("/docs/");
   });
 
-  it("answers an unrouted path with an ErrorSchema-valid 404", async () => {
+  it("answers an unrouted path with a NotFoundSchema-valid 404", async () => {
     const res = await request(app()).get("/no-such-route");
     expect(res.status).toBe(404);
-    expect(ErrorSchema.parse(res.body).status).toBe(404);
+    expect(NotFoundSchema.parse(res.body).status).toBe(404);
   });
 
   it("answers a malformed JSON body with an ErrorSchema-valid 400", async () => {
