@@ -1,0 +1,13 @@
+# Keep a copied template independent when it is nested inside another pnpm workspace.
+packages: []
+
+allowBuilds:
+  # tsx and Vitest use esbuild's install script to select the platform binary.
+  esbuild: true
+  # swagger-ui-dist pulls in Scarf's install-time analytics; never run it.
+  "@scarf/scarf": false
+
+# pnpm 11 holds back releases younger than a day; SDK 0.8.0 shipped 2026-09-24.
+# Safe to delete once that version is a day old.
+minimumReleaseAgeExclude:
+  - "@common-grants/sdk@0.8.0"
