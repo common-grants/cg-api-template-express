@@ -24,7 +24,7 @@ import {
   UuidSchema,
 } from "../schemas/index.js";
 import { ApiError, errorBody } from "../middleware/error.middleware.js";
-import { parseRequest } from "../middleware/validation.middleware.js";
+import { JSON_TYPES, parseRequest } from "../middleware/validation.middleware.js";
 import type {
   OpportunityFilters,
   OpportunityService,
@@ -192,6 +192,11 @@ export function createOpportunityRouter(service: OpportunityService): Router {
   });
 
   router.post("/search", async (req, res) => {
+    // A body `express.json()` skipped, such as `text/plain`, would otherwise
+    // read as an empty search and return every record. An empty body is fine.
+    if (req.is(JSON_TYPES) === false && req.get("content-length") !== "0") {
+      throw new ApiError(415, "Unsupported Media Type: send the search body as application/json");
+    }
     // `express.json()` leaves `req.body` undefined when no body was sent.
     const body = parseRequest(SearchBodySchema, req.body ?? {});
     const pagination = normalizePagination(body.pagination ?? {});

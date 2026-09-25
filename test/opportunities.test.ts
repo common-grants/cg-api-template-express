@@ -215,6 +215,35 @@ describe("search opportunities", () => {
     ]);
   });
 
+  it.each([
+    ["text/plain", "text/plain"],
+    ["form-encoded", "application/x-www-form-urlencoded"],
+  ])("rejects a %s search body with an ErrorSchema-valid 415", async (_label, type) => {
+    const { app, calls } = harness();
+
+    const res = await request(app)
+      .post(`${BASE}/search`)
+      .set("Content-Type", type)
+      .send(JSON.stringify({ filters: { status: { operator: "in", value: ["closed"] } } }));
+
+    expect(res.status).toBe(415);
+    expect(ErrorSchema.parse(res.body).status).toBe(415);
+    expect(calls.search).toEqual([]);
+  });
+
+  it("parses a +json media type as JSON", async () => {
+    const { app, calls } = harness();
+    const filters = { status: { operator: "in", value: ["closed"] } };
+
+    const res = await request(app)
+      .post(`${BASE}/search`)
+      .set("Content-Type", "application/vnd.api+json")
+      .send(JSON.stringify({ filters }));
+
+    expect(res.status).toBe(200);
+    expect(calls.search[0]).toMatchObject({ filters });
+  });
+
   it("passes the protocol's default filters straight through to the service", async () => {
     const { app, calls } = harness();
     const filters = { status: { operator: "in", value: ["open"] } };

@@ -100,8 +100,9 @@ is sent, so service output that drifts from the published shape becomes a
 `500`, never a `200`. Error bodies carry no service data; they are typed
 against the SDK's `ErrorSchema` and checked against it in the tests. Requests
 that do not match their schema, including a body that is not valid JSON, get a
-`400` in the protocol's error shape; an unknown but well-formed id gets a `404`
-in the protocol's not-found shape.
+`400` in the protocol's error shape; a search body that is not sent as JSON
+gets a `415` rather than being read as an empty search; an unknown but
+well-formed id gets a `404` in the protocol's not-found shape.
 
 Filters and sort keys this API does not implement are never silently dropped:
 an unsupported custom filter is ignored and named in `filterInfo.errors`, and a

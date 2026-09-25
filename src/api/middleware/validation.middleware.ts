@@ -1,6 +1,9 @@
 import type { z } from "zod";
 import { ApiError } from "./error.middleware.js";
 
+/** The media types `express.json()` parses, including `+json` types. */
+export const JSON_TYPES = ["application/json", "application/*+json"];
+
 /**
  * Parses one part of a request with its schema, or throws an SDK-shaped 400
  * carrying the Zod issues. Handlers call it first thing; Express 5 forwards
